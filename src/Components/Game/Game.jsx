@@ -33,6 +33,10 @@ const Game = () => {
   }, [player1, player2, navigate, fetchCategories]);
 
   const handleExit = () => {
+    if (!selectedOption && (currentIndex !== -1 && currentIndex <= questions?.length - 1)) {
+      toast.error("Select an option and complete questions to exit game");
+      return;
+    }
     if (currentIndex !== -1 && currentIndex < questions?.length - 1) {
       toast.error("Please complete the category to exit the game");
       return;
