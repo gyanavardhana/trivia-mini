@@ -1,30 +1,32 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 import Navbar from "./Navbar";
+import useGameStore from "../../Store/store";
 
 const Home = () => {
-  const navigate = useNavigate();
-  const [formData, setformData] = useState({
-    player1: "",
-    player2: "",
-  });
-  useEffect(() =>{
-    toast.success("Welcome to TriviaGame");
-  },[])
+  const navigate = useNavigate()
+  const { player1, player2, setPlayers } = useGameStore()
+  
+  useEffect(() => {
+    toast.success('Welcome to TriviaGame')
+  }, [])
+
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setformData({ ...formData, [name]: value });
-  };
+    const { name, value } = e.target
+    setPlayers(
+      name === 'player1' ? value : player1,
+      name === 'player2' ? value : player2
+    )
+  }
+
   const startGame = () => {
-    if (formData.player1 === "" || formData.player2 === "") {
-      toast.error("Players names should not be empty")
+    if (!player1 || !player2) {
+      toast.error('Players names should not be empty')
     } else {
-      navigate("/game", {
-        state: { player1: formData.player1, player2: formData.player2 },
-      });
+      navigate('/game')
     }
-  };
+  }
   return (
     <>
       <div>
@@ -44,7 +46,7 @@ const Home = () => {
               <input
                 id="player1"
                 name="player1"
-                value={formData.player1}
+                value={player1}
                 onChange={handleChange}
                 className="w-full p-2 rounded-md border-2 border-gray-700 focus:outline-none focus:ring-2 focus:ring-slate-200"
                 type="text"
@@ -60,7 +62,7 @@ const Home = () => {
                 name="player2"
                 type="text"
                 onChange={handleChange}
-                value={formData.player2}
+                value={player2}
                 className="w-full p-2 rounded-md border-2 border-gray-700 focus:outline-none focus:ring-2 focus:ring-slate-200"
               />
               <button

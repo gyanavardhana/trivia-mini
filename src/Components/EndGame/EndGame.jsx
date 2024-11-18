@@ -1,38 +1,45 @@
-import { useState, useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
-import {toast} from "react-toastify"
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 import Navbar from "../Home/Navbar";
+import useGameStore from "../../Store/store";
 
 const EndGame = () => {
-  const location = useLocation();
   const navigate = useNavigate();
+  const { player1, player2, player1score, player2score, resetGame } =
+    useGameStore();
 
-  
-  const { name1, name2, score1, score2 } = location.state || {};
+  // Determine winner and runner
+  const tie = player1score === player2score;
+  const winner = !tie
+    ? player1score > player2score
+      ? player1
+      : player2
+    : null;
+  const runner = !tie
+    ? player1score > player2score
+      ? player2
+      : player1
+    : null;
 
-  const [winner, setWinner] = useState(null);
-  const [runner, setRunner] = useState(null);
-  const [tie, setTie] = useState(false);
-
+  // Effect to validate players and display toast notifications
   useEffect(() => {
-    if (!location.state) {
+    if (!player1 || !player2) {
       navigate("/");
       return;
     }
 
-    if (score1 > score2) {
-      toast.success(`Congratulations ${name1}`)
-      setWinner(name1);
-      setRunner(name2);
-    } else if (score2 > score1) {
-      toast.success(`Congratulations ${name2}`)
-      setRunner(name1);
-      setWinner(name2);
+    if (!tie) {
+      toast.success(`Congratulations ${winner}!`);
     } else {
-      toast.success("Match Tie")
-      setTie(true);
+      toast.info("The match ended in a tie!");
     }
-  }, [location.state, navigate, name1, name2, score1, score2]);
+  }, [player1, player2, player1score, player2score, tie, winner, navigate]);
+
+  const handleGoHome = () => {
+    resetGame();
+    navigate("/");
+  };
 
   return (
     <>
@@ -43,14 +50,22 @@ const EndGame = () => {
             <h1 className="text-3xl font-bold mb-6">Game Results</h1>
             <p className="text-xl mb-4">
               <span className="font-bold text-slate-300">Winner:</span> {winner}{" "}
-              (Score: <span className="text-green-400">{winner === name1 ? score1 : score2}</span>)
+              (Score:{" "}
+              <span className="text-green-400">
+                {winner === player1 ? player1score : player2score}
+              </span>
+              )
             </p>
             <p className="text-xl mb-4">
-              <span className="font-bold text-slate-300">Runner-Up:</span> {runner}{" "}
-              (Score: <span className="text-yellow-400">{runner === name1 ? score1 : score2}</span>)
+              <span className="font-bold text-slate-300">Runner-Up:</span>{" "}
+              {runner} (Score:{" "}
+              <span className="text-yellow-400">
+                {runner === player1 ? player1score : player2score}
+              </span>
+              )
             </p>
             <button
-              onClick={() => navigate("/")}
+              onClick={handleGoHome}
               className="mt-6 bg-slate-600 text-slate-200 px-6 py-2 rounded-md hover:bg-slate-500 transition-all"
             >
               Go to Home
@@ -61,13 +76,13 @@ const EndGame = () => {
             <h1 className="text-3xl font-bold mb-6">It's a Tie!</h1>
             <p className="text-xl mb-4">
               Both players scored{" "}
-              <span className="text-green-400 font-bold">{score1}</span>.
+              <span className="text-green-400 font-bold">{player1score}</span>.
             </p>
             <p className="text-xl mb-6">
               The match is tied. Please navigate to home to play again.
             </p>
             <button
-              onClick={() => navigate("/")}
+              onClick={handleGoHome}
               className="bg-slate-600 text-slate-200 px-6 py-2 rounded-md hover:bg-slate-500 transition-all"
             >
               Go to Home
